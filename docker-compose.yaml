@@ -1,0 +1,23 @@
+version: '3.9'
+
+services:
+  relation-extraction-model:
+    build: relation-extraction-model
+    container_name: relation-extraction-model
+    restart: always
+    deploy:
+      resources:
+          reservations:
+              devices:
+                  - driver: nvidia
+                    device_ids: ['1']
+                    capabilities: [ gpu ]
+    volumes:
+      - ./relation_extraction_model:/usr/src/seq2seq
+      - /home/ontollm/.cache/huggingface/hub:/home/papper_user/.cache/huggingface/hub
+    env_file:
+      - ./relation_extraction_model/.env
+    ports:
+      - 8003:8000
+    command: >
+      sh -c "uvicorn main:app --host 0.0.0.0 --port 8000 --reload --log-config /usr/src/seq2seq/uvicorn_logging.conf"
